@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deno KV 用户系统</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 2rem auto; }
+    .user-card { background: #f8f9fa; padding: 1rem; margin: 1rem 0; border-radius: 8px; }
+    form { display: grid; gap: 1rem; max-width: 400px; }
+    input { padding: 0.8rem; border: 1px solid #ddd; }
+    button { background: #2563eb; color: white; padding: 0.8rem; border: none; }
+  </style>
+</head>
+<body>
+  <h1>用户注册系统 (Deno KV)</h1>
+
+  <div class="register-form">
+    <h2>注册新用户</h2>
+    <form onsubmit="return handleSubmit(event)">
+      <input type="text" name="username" placeholder="用户名" required>
+      <input type="password" name="password" placeholder="密码" required>
+      <button type="submit">立即注册</button>
+    </form>
+  </div>
+
+  <div class="user-list">
+    <h2>最新注册用户</h2>
+    <% users.forEach(user => { %>
+      <div class="user-card">
+        <h3><%= user.username %></h3>
+        <p>注册时间：<%= user.createdAt.toLocaleString() %></p>
+      </div>
+    <% }) %>
+  </div>
+
+  <script>
+    async function handleSubmit(event) {
+      event.preventDefault();
+      
+      const formData = new FormData(event.target);
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: formData.get('username'),
+          password: formData.get('password')
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        localStorage.setItem('token', result.token);
+        alert('注册成功！');
+        window.location.reload();
+      } else {
+        const error = await response.json();
+        alert('错误：' + error.message);
+      }
+    }
+  </script>
+</body>
+</html>
